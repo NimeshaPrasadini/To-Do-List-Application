@@ -1,0 +1,83 @@
+﻿@model IEnumerable<ToDo>
+
+        <div class="row">
+            <div class="col-md-2">
+                <form asp-action="Filter" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Priority Level</label>
+                        <select name="filter" class="form-select" 
+                        asp-items="@(new SelectList(ViewBag.Priorities,"PriorityId","PriorityName",ViewBag.Filters.PriorityId))">
+                        <option value="all">All</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Due</label>
+                        <select name="filter" class="form-select"
+                        asp-items="@(new SelectList(ViewBag.DueFilters,"Key","Value",ViewBag.Filters.Due))">
+                        <option value="all">All</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="filter" class="form-select"
+                        asp-items="@(new SelectList(ViewBag.Statuses,"StatusId","StatusName",ViewBag.Filters.StatusId))">
+                        <option value="all">All</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a asp-action="Index" asp-route-id="" class="btn btn-primary">Clear</a>
+                </form>
+            </div>
+
+            <div class="col-md-10">
+            <form asp-action="UpdateStatus" method="post" asp-route-itemid="@ViewBag.Filters.FilterString">
+                <table class="table table-bored table-striped mt-2">
+                    <thead>
+                        <tr>
+                            <th>Task Name</th>
+                            <th>Description</th>
+                            <th>Priority Level</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th class="w-25"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach(ToDo task in Model)
+                        {
+                            string overdue = task.Overdue ? "bg-warning" : "";
+                            <tr>
+                                <td>@task.TaskName</td>
+                                <td>@task.Description</td>
+                                <td>@task.Priority.PriorityName</td>
+                                <td class="@overdue">@task.DueDate.ToShortDateString()</td>
+                                <td class="@overdue">@task.Status.StatusName</td>
+                                <td>
+                                    @if (task.StatusId == "notstarted")
+                                    {
+                                        <button type="submit" class="btn btn-success btn-sm"
+                                        name="@nameof(ToDo.TaskID)" value="@task.TaskID">
+                                        Mark In Progress
+                                        </button>
+                                            
+                                    }
+                                    @if (task.StatusId == "inprogress")
+                                    {
+                                        <button type="submit" class="btn btn-primary btn-sm"
+                                        name="@nameof(ToDo.TaskID)" value="@task.TaskID">
+                                        Mark Completed
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+             </form>
+
+            <form asp-action="DeleteComplete" method="post" asp-route-id="@ViewBag.Filters.FilterString">
+                <a asp-action="Add" class="btn btn-primary">Add New Task</a>
+                <button type="submit" class="btn btn-danger">Delete Completed Tasks</button>
+            </form>
+            </div>
+        </div>
